@@ -1874,8 +1874,7 @@ keydown(100);keyup(100); // trigger the end
     self.btest('cubegeom_pre.c', reference='cubegeom_pre.png', args=['-s', 'LEGACY_GL_EMULATION=1', '-lGL', '-lSDL'])
 
   @requires_graphics_hardware
-  @no_chrome()
-  @no_chrome("RELOCATABLE=1 forces synchronous compilation which chromedoesn't support")
+  @no_chrome("RELOCATABLE=1 forces synchronous compilation which chrome doesn't support")
   def test_cubegeom_pre_relocatable(self):
     self.btest('cubegeom_pre.c', reference='cubegeom_pre.png', args=['-s', 'LEGACY_GL_EMULATION=1', '-lGL', '-lSDL', '-s', 'RELOCATABLE=1'])
 
@@ -3076,11 +3075,12 @@ window.close = function() {
       self.btest('emterpreter_async.cpp', '1', args=['-s', 'EMTERPRETIFY=1', '-s', 'EMTERPRETIFY_ASYNC=1', '-O' + str(opts), '-g2'])
 
   def test_emterpreter_async_2(self):
-    # Error.stackTraceLimit default to 10-in chrome by this test relies on more
+    # Error.stackTraceLimit default to 10 in chrome by this test relies on more
     # than 40 stack frames being reported.
     with open('pre.js', 'w') as f:
       f.write('Error.stackTraceLimit = 80;\n')
-    self.btest('emterpreter_async_2.cpp', '40', args=['-s', 'EMTERPRETIFY=1', '-s', 'EMTERPRETIFY_ASYNC=1', '--pre-js', 'pre.js'])
+    self.btest('emterpreter_async_2.cpp', '40', args=['-s', 'EMTERPRETIFY=1',
+        '-s', 'EMTERPRETIFY_ASYNC=1', '-O3', '--pre-js', 'pre.js', ])
 
   def test_emterpreter_async_virtual(self):
     for opts in [0, 1, 2, 3]:
