@@ -83,6 +83,15 @@ def no_chrome(note='chome is not supported'):
   return lambda f: f
 
 
+def no_swiftshader(f):
+  def decorated(self):
+    if is_chrome() and '--use-gl=swiftshader' in EMTEST_BROWSER:
+      return self.skipTest('not compatible with swiftshader')
+    return f(self)
+
+  return decorated
+
+
 requires_graphics_hardware = unittest.skipIf(os.getenv('EMTEST_LACKS_GRAPHICS_HARDWARE'), "This test requires graphics hardware")
 requires_sound_hardware = unittest.skipIf(os.getenv('EMTEST_LACKS_SOUND_HARDWARE'), "This test requires sound hardware")
 
@@ -1860,19 +1869,23 @@ keydown(100);keyup(100); // trigger the end
     self.btest('gl_matrix_identity.c', expected=['-1882984448', '460451840', '1588195328'], args=['-s', 'LEGACY_GL_EMULATION=1', '-lGL', '-lSDL'])
 
   @requires_graphics_hardware
+  @no_swiftshader
   def test_cubegeom_pre(self):
     self.btest('cubegeom_pre.c', reference='cubegeom_pre.png', args=['-s', 'LEGACY_GL_EMULATION=1', '-lGL', '-lSDL'])
 
   @requires_graphics_hardware
+  @no_chrome()
   @no_chrome("RELOCATABLE=1 forces synchronous compilation which chromedoesn't support")
   def test_cubegeom_pre_relocatable(self):
     self.btest('cubegeom_pre.c', reference='cubegeom_pre.png', args=['-s', 'LEGACY_GL_EMULATION=1', '-lGL', '-lSDL', '-s', 'RELOCATABLE=1'])
 
   @requires_graphics_hardware
+  @no_swiftshader
   def test_cubegeom_pre2(self):
     self.btest('cubegeom_pre2.c', reference='cubegeom_pre2.png', args=['-s', 'GL_DEBUG=1', '-s', 'LEGACY_GL_EMULATION=1', '-lGL', '-lSDL']) # some coverage for GL_DEBUG not breaking the build
 
   @requires_graphics_hardware
+  @no_swiftshader
   def test_cubegeom_pre3(self):
     self.btest('cubegeom_pre3.c', reference='cubegeom_pre2.png', args=['-s', 'LEGACY_GL_EMULATION=1', '-lGL', '-lSDL'])
 
@@ -1946,10 +1959,12 @@ void *getBindBuffer() {
     self.btest('cubegeom_fog.c', reference='cubegeom_fog.png', args=['-s', 'LEGACY_GL_EMULATION=1', '-lGL', '-lSDL'])
 
   @requires_graphics_hardware
+  @no_swiftshader
   def test_cubegeom_pre_vao(self):
     self.btest('cubegeom_pre_vao.c', reference='cubegeom_pre_vao.png', args=['-s', 'LEGACY_GL_EMULATION=1', '-lGL', '-lSDL'])
 
   @requires_graphics_hardware
+  @no_swiftshader
   def test_cubegeom_pre2_vao(self):
     self.btest('cubegeom_pre2_vao.c', reference='cubegeom_pre_vao.png', args=['-s', 'LEGACY_GL_EMULATION=1', '-lGL', '-lSDL'])
 
@@ -1958,6 +1973,7 @@ void *getBindBuffer() {
     self.btest('cubegeom_pre2_vao2.c', reference='cubegeom_pre2_vao2.png', args=['-s', 'LEGACY_GL_EMULATION=1', '-lGL', '-lSDL'])
 
   @requires_graphics_hardware
+  @no_swiftshader
   def test_cubegeom_pre_vao_es(self):
     self.btest('cubegeom_pre_vao_es.c', reference='cubegeom_pre_vao.png', args=['-s', 'FULL_ES2=1', '-lGL', '-lSDL'])
 
@@ -3060,7 +3076,11 @@ window.close = function() {
       self.btest('emterpreter_async.cpp', '1', args=['-s', 'EMTERPRETIFY=1', '-s', 'EMTERPRETIFY_ASYNC=1', '-O' + str(opts), '-g2'])
 
   def test_emterpreter_async_2(self):
-    self.btest('emterpreter_async_2.cpp', '40', args=['-s', 'EMTERPRETIFY=1', '-s', 'EMTERPRETIFY_ASYNC=1', '-O3'])
+    # Error.stackTraceLimit default to 10-in chrome by this test relies on more
+    # than 40 stack frames being reported.
+    with open('pre.js', 'w') as f:
+      f.write('Error.stackTraceLimit = 80;\n')
+    self.btest('emterpreter_async_2.cpp', '40', args=['-s', 'EMTERPRETIFY=1', '-s', 'EMTERPRETIFY_ASYNC=1', '--pre-js', 'pre.js'])
 
   def test_emterpreter_async_virtual(self):
     for opts in [0, 1, 2, 3]:
