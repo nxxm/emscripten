@@ -73,6 +73,16 @@ def shell_with_script(shell_file, output_file, replacement):
       output.write(input.read().replace('{{{ SCRIPT }}}', replacement))
 
 
+def is_chrome():
+  return EMTEST_BROWSER and 'chrom' in EMTEST_BROWSER.lower()
+
+
+def no_chrome(note='chome is not supported'):
+  if is_chrome():
+    return unittest.skip(note)
+  return lambda f: f
+
+
 requires_graphics_hardware = unittest.skipIf(os.getenv('EMTEST_LACKS_GRAPHICS_HARDWARE'), "This test requires graphics hardware")
 requires_sound_hardware = unittest.skipIf(os.getenv('EMTEST_LACKS_SOUND_HARDWARE'), "This test requires sound hardware")
 
@@ -1852,6 +1862,10 @@ keydown(100);keyup(100); // trigger the end
   @requires_graphics_hardware
   def test_cubegeom_pre(self):
     self.btest('cubegeom_pre.c', reference='cubegeom_pre.png', args=['-s', 'LEGACY_GL_EMULATION=1', '-lGL', '-lSDL'])
+
+  @requires_graphics_hardware
+  @no_chrome("RELOCATABLE=1 forces synchronous compilation which chromedoesn't support")
+  def test_cubegeom_pre_relocatable(self):
     self.btest('cubegeom_pre.c', reference='cubegeom_pre.png', args=['-s', 'LEGACY_GL_EMULATION=1', '-lGL', '-lSDL', '-s', 'RELOCATABLE=1'])
 
   @requires_graphics_hardware
@@ -3198,6 +3212,7 @@ window.close = function() {
       print(opts)
       self.btest(os.path.join('webidl', 'test.cpp'), '1', args=['--post-js', 'glue.js', '-I' + path_from_root('tests', 'webidl'), '-DBROWSER'] + opts)
 
+  @no_chrome("required synchronous wasm compilation")
   def test_dynamic_link(self):
     open('pre.js', 'w').write('''
       Module.dynamicLibraries = ['side.wasm'];
@@ -3256,6 +3271,7 @@ window.close = function() {
     self.btest(self.in_dir('main.cpp'), '2', args=['-s', 'MAIN_MODULE=1', '-O2', '--pre-js', 'pre.js', '-s', 'WASM=1'])
 
   @requires_graphics_hardware
+  @no_chrome("required synchronous wasm compilation")
   def test_dynamic_link_glemu(self):
     open('pre.js', 'w').write('''
       Module.dynamicLibraries = ['side.wasm'];
@@ -3372,10 +3388,9 @@ window.close = function() {
     self.btest(path_from_root('tests', 'pthread', 'test_pthread_cancel.cpp'), expected='1', args=['-O3', '-s', 'USE_PTHREADS=1', '-s', 'PTHREAD_POOL_SIZE=8'])
 
   # Test pthread_kill() operation
+  # This test hangs the chrome render process, and keep subsequent tests from passing too
+  @no_chrome('pthread_kill hangs chrome renderer')
   def test_pthread_kill(self):
-    if EMTEST_BROWSER and 'chrom' in EMTEST_BROWSER.lower():
-      # This test hangs the chrome render process, and keep subsequent tests from passing too
-      self.skipTest("pthread_kill hangs chrome renderer")
     self.btest(path_from_root('tests', 'pthread', 'test_pthread_kill.cpp'), expected='0', args=['-O3', '-s', 'USE_PTHREADS=1', '-s', 'PTHREAD_POOL_SIZE=8'])
 
   # Test that pthread cleanup stack (pthread_cleanup_push/_pop) works.
@@ -3669,6 +3684,7 @@ window.close = function() {
     self.btest('browser_test_hello_world.c', expected='0', args=['-s', 'BINARYEN=1', '-s', 'BINARYEN_METHOD="interpret-binary"'])
     self.btest('browser_test_hello_world.c', expected='0', args=['-s', 'BINARYEN=1', '-s', 'BINARYEN_METHOD="interpret-binary"', '-O2'])
 
+  @no_chrome("chrome doesn't support synchronous compilation over 4k")
   def test_binaryen_async(self):
     # notice when we use async compilation
     script = '''
@@ -3696,7 +3712,7 @@ window.close = function() {
     {{{ SCRIPT }}}
 '''
     shell_with_script('shell.html', 'shell.html', script)
-    common_args = ['-s', 'WASM=1', '--shell-file', 'shell.html']
+    common_args = ['--shell-file', 'shell.html']
     for opts, expect in [
       ([], 1),
       (['-O1'], 1),

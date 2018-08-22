@@ -212,7 +212,7 @@ jobs:
             CHROME_FLAGS_WASM="--enable-features=WebAssembly --enable-features=SharedArrayBuffer --js-flags=\"--experimental-wasm-threads --harmony-sharedarraybuffer\""
             export EMTEST_BROWSER="xvfb-run $HOME/chrome-linux/chrome $CHROME_FLAGS_BASE $CHROME_FLAGS_WASM"
             # Just run a subset of the tests for now.  To be expanded.
-            EMCC_CORES=4 ./emscripten/tests/runner.py browser.test_a*
+            EMCC_CORES=4 ./emscripten/tests/runner.py browser.test_[abcd]*
   test-ab:
     <<: *test-defaults
     environment:
