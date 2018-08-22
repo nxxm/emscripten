@@ -1885,7 +1885,7 @@ void *getBindBuffer() {
 
   @requires_graphics_hardware
   def test_cubegeom_glew(self):
-    self.btest('cubegeom_glew.c', reference='cubegeom.png', args=['-O2', '--closure', '1', '-s', 'LEGACY_GL_EMULATION=1', '-lGL', '-lGLEW', '-lSDL'])
+    self.btest('cubegeom_glew.c', reference='cubegeom.png', args=['-O2', '-s', 'LEGACY_GL_EMULATION=1', '-lGL', '-lGLEW', '-lSDL'])
 
   @requires_graphics_hardware
   def test_cubegeom_color(self):
