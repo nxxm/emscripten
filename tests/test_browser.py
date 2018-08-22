@@ -3079,8 +3079,7 @@ window.close = function() {
     # than 40 stack frames being reported.
     with open('pre.js', 'w') as f:
       f.write('Error.stackTraceLimit = 80;\n')
-    self.btest('emterpreter_async_2.cpp', '40', args=['-s', 'EMTERPRETIFY=1',
-        '-s', 'EMTERPRETIFY_ASYNC=1', '-O3', '--pre-js', 'pre.js', ])
+    self.btest('emterpreter_async_2.cpp', '40', args=['-s', 'EMTERPRETIFY=1', '-s', 'EMTERPRETIFY_ASYNC=1', '-O3', '--pre-js', 'pre.js', ])
 
   def test_emterpreter_async_virtual(self):
     for opts in [0, 1, 2, 3]:

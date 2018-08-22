@@ -197,7 +197,7 @@ jobs:
             apt-get update -q
             # install chromium-browser in order to ensure we have all the
             # dependecies for chrome.
-            apt-get install -q -y unzip xvfb chromium-browser
+            apt-get install -q -y unzip xvfb chromium-browser openjdk-9-jre-headless
       - run:
           name: download chrome
           command: |
