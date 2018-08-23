@@ -407,7 +407,7 @@ emcc: supported targets: llvm bitcode, javascript, NOT elf
 ''' % (open(shared.path_from_root('site', 'build', 'text', 'docs', 'tools_reference', 'emcc.txt')).read()))
     return 0
 
-  elif sys.argv[1] == '--version':
+  elif '--version' in sys.argv:
     revision = '(unknown revision)'
     here = os.getcwd()
     os.chdir(shared.path_from_root())
@@ -417,7 +417,7 @@ emcc: supported targets: llvm bitcode, javascript, NOT elf
       pass
     finally:
       os.chdir(here)
-    print('''emcc (Emscripten gcc/clang-like replacement) %s (%s)
+    print('''emcc (Emscripten gcc/clang-like replacement) version %s (%s)
 Copyright (C) 2014 the Emscripten authors (see AUTHORS.txt)
 This is free and open source software under the MIT license.
 There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
