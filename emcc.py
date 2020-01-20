@@ -91,7 +91,8 @@ SUPPORTED_LLD_LINKER_FLAGS = (
     '--no-check-features',
     '--trace',
     '--no-threads',
-    '-mllvm'
+    '-mllvm',
+    '--shared-memory'
 )
 
 
